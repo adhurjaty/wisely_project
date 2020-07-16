@@ -1,5 +1,5 @@
 import InventorySpan from "../models/InventorySpan";
-import ReservationSpan from "../models/ReservationSpan";
+import ReservationSpan from "../models/DailyReservations";
 import Reservation from "../models/Reservation";
 
 

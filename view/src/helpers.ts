@@ -1,3 +1,5 @@
+import { SLOT_DURATION } from "./constants";
+
 export function range(start: number, end?: number, step?: number): number[] {
     if(!end) {
         end = start;

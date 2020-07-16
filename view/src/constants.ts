@@ -1,0 +1,1 @@
+export const SLOT_DURATION = 15; // minutes per slot

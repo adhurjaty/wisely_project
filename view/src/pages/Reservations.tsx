@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import styled from 'styled-components';
 import Calendar from 'react-calendar';
 import { getReservationSpans } from '../backend_interface/api_interface';
-import ReservationSpan from '../models/ReservationSpan';
+import ReservationSpan from '../models/DailyReservations';
 import Agenda from '../components/Agenda';
 
 

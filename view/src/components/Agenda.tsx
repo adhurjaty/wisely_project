@@ -1,8 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import styled from 'styled-components';
-import ReservationSpan from '../models/ReservationSpan';
-import { range } from '../helpers';
+import ReservationSpan from '../models/DailyReservations';
+import { range, slotKeysForHour } from '../helpers';
 import Reservation from '../models/Reservation';
+import { SLOT_DURATION } from '../constants';
 
 
 const AgendaContainer = styled.div`
@@ -13,7 +14,7 @@ const AgendaContainer = styled.div`
 
 const HourBlock = styled.div`
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     border-bottom: 1px solid lightgray;
     height: 200px;
 `
@@ -26,8 +27,15 @@ const HourLabelBlock = styled.div`
 `
 
 const ReservationSlot = styled.div`
+    display: flex;
+    flex-direction: row;
     flex-grow: 1;
     border-bottom: 1px solid lightgray;
+`
+
+const ReservationItem = styled.div`
+    flex-grow: 1;
+    background: green;
 `
 
 function Agenda({reservationSpans}: {reservationSpans: ReservationSpan[]}): JSX.Element {
@@ -35,34 +43,67 @@ function Agenda({reservationSpans}: {reservationSpans: ReservationSpan[]}): JSX.
     const minHour = Math.min(...timeSpans.map(s => s.startTime.getHours()));
     const maxHour = Math.max(...timeSpans.map(s => s.endTime.getHours()));
 
-    const reservations = reservationSpans.map(rs => rs.reservations).flat();
-    const resByHour = reservations.reduce((resHourDict, reservation) => {
-        let hour 
-        if(!resHourDict[])
-    }, {})
-
     return (
         <AgendaContainer>
             {range(minHour, maxHour).map((h, i) => {
                 return <AgendaHour 
                             hour={h}
-                            items={[]} />
+                            items={ReservationsThisHour(h)} />
             })}
         </AgendaContainer>
     )
 }
 
-function AgendaHour({hour, items}: {hour: number, items: Reservation[]}): JSX.Element {
+function ReservationsThisHour(reservationMap: Map<string, Reservation[]>, hour: number):
+    Map<string, Reservation[]>
+{
+    const keys = slotKeysForHour(hour);
+    const hourlyResMap = new Map<string, Reservation[]>();
+
+    for (const key of keys) {
+        if(reservationMap.has(key)) {
+            hourlyResMap.set(key, reservationMap.get(key) as Reservation[])
+        }
+    }
+
+    return hourlyResMap;
+}
+
+function AgendaHour({hour, items}: {hour: number, items: Map<string, Reservation[]>}): 
+    JSX.Element
+{
     return (
         <HourBlock>
             <HourLabelBlock>{formatHour(hour)}</HourLabelBlock>
-            {items.map((item, i) => <div>{i}</div>)}
+            <AgendaSlot items={items} />
         </HourBlock>
     )
 }
 
 function formatHour(hour: number): string {
     return `${hour % 12 || 12}:00 ${hour > 11 ? 'PM': 'AM'}`
+}
+
+function AgendaSlot({items}: {items: Map<string, Reservation[]>}): JSX.Element {
+    const slots = 60 / SLOT_DURATION;
+
+    return (
+        <div>
+            {range(slots).map((i) => {
+                return (
+                    <ReservationSlot>a</ReservationSlot>
+                )
+            })}
+        </div>
+    )
+}
+
+function AgendaItem({item, color}: {item: Reservation, color?: string}): JSX.Element {
+    return (
+        <ReservationItem>
+            {`${item.name} party of ${item.partySize}`}
+        </ReservationItem>
+    )
 }
 
 export default Agenda
