@@ -10,7 +10,7 @@ export function range(start: number, end?: number, step?: number): number[] {
     }
 
     const r = [];
-    for (let i = start; i <= end; i+=step) {
+    for (let i = start; i < end; i+=step) {
         r.push(i);
     }
 

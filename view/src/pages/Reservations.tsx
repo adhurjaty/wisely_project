@@ -1,14 +1,14 @@
 import React, {useState, useEffect} from 'react';
 import styled from 'styled-components';
 import Calendar from 'react-calendar';
-import { getReservationSpans } from '../backend_interface/api_interface';
-import ReservationSpan from '../models/DailyReservations';
+import { getDailyReservations } from '../backend_interface/api_interface';
+import DailyReservations from '../models/DailyReservations';
 import Agenda from '../components/Agenda';
 
 
 interface ReservationState {
     isLoading: boolean;
-    reservationSpans: ReservationSpan[],
+    dailyReservations: DailyReservations | null,
     error: string
 };
 
@@ -35,22 +35,22 @@ const ReservationSection = styled.div`
 function Reservations(): JSX.Element {
     let [state, setState] = useState<ReservationState>({
         isLoading: true,
-        reservationSpans: [],
+        dailyReservations: null,
         error: ''
     });
     let [date, setDate] = useState(new Date());
 
     useEffect(() => {
-        getReservationSpans(date).then((resSpans) => {
+        getDailyReservations(date).then((dailyRes) => {
             setState({
                 isLoading: false,
-                reservationSpans: resSpans,
+                dailyReservations: dailyRes,
                 error: ''
             })
         }).catch((err) => {
             setState({
                 isLoading: false,
-                reservationSpans: [],
+                dailyReservations: null,
                 error: err.toString()
             })
         })
@@ -81,7 +81,10 @@ function StateDisplay({state}: {state: ReservationState}): JSX.Element {
     if(state.error) {
         return ErrorDisplay(state.error);
     }
-    return ReservationDisplay(state.reservationSpans);
+    if(!state.dailyReservations) {
+        throw new Error("Empty reservations object");
+    }
+    return ReservationDisplay(state.dailyReservations);
 }
 
 function IsLoadingDisplay(): JSX.Element {
@@ -92,11 +95,11 @@ function ErrorDisplay(error: string): JSX.Element {
     return <ErrorText>{error}</ErrorText>
 }
 
-function ReservationDisplay(reservationSpans: ReservationSpan[]): JSX.Element {
+function ReservationDisplay(reservations: DailyReservations): JSX.Element {
     return (
         <ReservationSection>
             <SectionHeader>Reservation Times</SectionHeader>
-            <Agenda reservationSpans={reservationSpans} />
+            <Agenda dailyReservations={reservations} />
         </ReservationSection>
     )
 }

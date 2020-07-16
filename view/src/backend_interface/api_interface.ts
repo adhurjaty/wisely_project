@@ -1,5 +1,5 @@
 import InventorySpan from "../models/InventorySpan";
-import ReservationSpan from "../models/DailyReservations";
+import DailyReservations from "../models/DailyReservations";
 import Reservation from "../models/Reservation";
 
 
@@ -38,13 +38,13 @@ export async function makeReservation(): Promise<StatusMessage> {
     }
 }
 
-export async function getReservationSpans(day: Date): Promise<ReservationSpan[]> {
+export async function getDailyReservations(day: Date): Promise<DailyReservations> {
     const invTask = getInventory(day);
 
     const reservations = await getDayReservations(day)
     const inv = await invTask;
 
-    return buildReservationSpans(inv, reservations)
+    return new DailyReservations(inv, reservations);
 }
 
 async function getDayReservations(day: Date): Promise<Reservation[]> {
@@ -70,20 +70,4 @@ async function getDayReservations(day: Date): Promise<Reservation[]> {
     r3.time = new Date(2020, 7, 15, 18, 45);
 
     return [r1, r2, r3]
-}
-
-function buildReservationSpans(spans: InventorySpan[], reservations: Reservation[]): 
-    ReservationSpan[]
-{
-    const resSpans = spans.map(s => new ReservationSpan(s))
-    for (const res of reservations) {
-        let span = resSpans.find(s => 
-            s.timeSpan.startTime <= res.time && res.time < s.timeSpan.endTime);
-        if(!span) {
-            throw new Error("Reservation does not exist in time span")
-        }
-        span.reservations.push(res);
-    }
-
-    return resSpans
 }
