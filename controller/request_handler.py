@@ -3,7 +3,7 @@ from flask import Flask, request, g, redirect, make_response
 from .controller_factory import ControllerFactory
 
 
-INVENTORY_ROUTE = '/inventory'
+INVENTORY_ROUTE = '/inventories'
 RESERVATIONS_ROUTE = '/reservations'
 RESERVATION_ROUTE = f'{RESERVATIONS_ROUTE}/<reservation_id>'
 
@@ -22,21 +22,15 @@ def set_controller():
 
 
 @app.route(INVENTORY_ROUTE)
-def get_inventory():
+def get_inventories():
     try:
-        # get inventory from start to end dates 
-        time_span = {
-            'start': request.args.get('startTime'),
-            'end': request.args.get('endTime')
-        }
+        day = request.args.get('day')
+        if not day:
+            raise Exception('Must specify day')
 
-        if not time_span['start'] or time_span['end']:
-            raise Exception('Must specify valid time span')
-
-        inventory = g.controller.get_inventory(**time_span)
-        return inventory
+        return g.controller.get_inventories(day)
     except Exception as e:
-        pass
+        return show_error(str(e))
 
 
 @app.route(RESERVATIONS_ROUTE)
@@ -45,31 +39,35 @@ def get_reservations():
         day = request.args.get('day')
         if not day:
             raise Exception('Must specify day')
-            
-        reservations = g.controller.get_reservations(day)
+
+        return g.controller.get_reservations(day)
     except Exception as e:
-        pass
+        return show_error(str(e))
 
 @app.route(RESERVATIONS_ROUTE, methods=['POST'])
 def make_reservation():
     try:
-        slot_id = request.json.get('slotID')
-        g.controller.make_reservation(slot_id, **request.json)
-        return show_success()
+        return g.controller.make_reservation(**request.json)
     except Exception as e:
-        pass
+        return show_error(str(e))
 
 
 @app.route(RESERVATION_ROUTE, methods=['PUT'])
 def update_reservation():
     try:
-        g.controller.update_reservation()
+        return g.controller.update_reservation(**request.json)
     except Exception as e:
-        pass
-
+        return show_error(str(e))
 
 
 def show_success():
     return {
-        'status': 'success'
+        'status': 'success',
+        'message': 'success'
     }
+
+def show_error(error_text, code=400):
+    return {
+        'status': 'error',
+        'message': error_text
+    }, code
