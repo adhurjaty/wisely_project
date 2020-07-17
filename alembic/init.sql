@@ -1,0 +1,1 @@
+CREATE DATABASE wisely_reservations;
