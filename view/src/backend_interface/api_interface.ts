@@ -31,7 +31,21 @@ export async function createInventorySpan(): Promise<StatusMessage> {
     }
 }
 
-export async function makeReservation(): Promise<StatusMessage> {
+export async function makeReservation(reservation: Reservation): Promise<StatusMessage> {
+    return {
+        status: 'success',
+        message: 'success'
+    }
+}
+
+export async function updateReservation(reservation: Reservation): Promise<StatusMessage> {
+    return {
+        status: 'success',
+        message: 'success'
+    }
+}
+
+export async function deleteReservation(reservation: Reservation): Promise<StatusMessage> {
     return {
         status: 'success',
         message: 'success'

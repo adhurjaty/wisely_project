@@ -4,6 +4,7 @@ import Reservation from '../models/Reservation';
 import InventorySpan from '../models/InventorySpan';
 import { MAX_PARTY_SIZE, SLOT_DURATION } from '../constants';
 import { range, formatTime } from '../helpers';
+import { updateReservation, makeReservation, deleteReservation } from '../backend_interface/api_interface';
 
 
 const Container = styled.div`
@@ -64,6 +65,8 @@ function ReservationForm({timeSlots, reservation, time}:
 {
     const [nameError, setNameError] = useState("");
     const [emailError, setEmailError] = useState("");
+    const [requestError, setRequestError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     const isEditing = !!reservation;
 
@@ -72,6 +75,54 @@ function ReservationForm({timeSlots, reservation, time}:
     }
     reservation = reservation || new Reservation();
     time = time || GetStartTime(timeSlots);
+
+    const validate = () => {
+        setNameError('');
+        setEmailError('');
+
+        if(!reservation) {
+            return false;
+        }
+
+        if(!/[\w\-_ ]+/.test(reservation.name.trim())) {
+            setNameError("Must enter a name");
+            return false;
+        }
+
+        if(!/^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/.test(reservation.email)) {
+            setEmailError("Invalid email address");
+            return false;
+        }
+
+        return true;
+    }
+
+    const apiRequest = isEditing ? updateReservation : makeReservation;
+
+    const handleSubmit = () => {
+        setRequestError("");
+        setSuccessMessage("");
+
+        if(!validate() || !reservation) {
+            return;
+        }
+
+        apiRequest(reservation).then(result => {
+            if(result.status == "error") {
+                setRequestError(result.message);
+            } else {
+                setSuccessMessage("success");
+            }
+        });
+    }
+
+    const deleteRes = () => {
+        if(!reservation) {
+            return;
+        }
+
+        deleteReservation(reservation);
+    }
 
     return (
         <Container>
@@ -85,8 +136,15 @@ function ReservationForm({timeSlots, reservation, time}:
                 <TimeSection reservation={reservation}
                     timeSlots={timeSlots} />
             </SectionsContainer>
-            { isEditing && <DeleteButton>Delete</DeleteButton>}
-            <SubmitButton>{isEditing && "Update" || "Create"}</SubmitButton>
+            { isEditing && (
+                <DeleteButton onClick={e => deleteRes()}>
+                    Delete
+                </DeleteButton>
+            )}
+            <SubmitButton onClick={e => handleSubmit()}>
+                {isEditing && "Update" || "Create"}
+            </SubmitButton>
+            <FieldError>{requestError}</FieldError>
         </Container>
     )
 }
