@@ -24,7 +24,11 @@ export default class DailyReservations {
     }
 
     private fromSpanKey(key: string): [number, number] {
-        return key.split('|').map(parseInt) as [number, number];
+        const keyParts = key.split('|').map(x => parseInt(x));
+        if(keyParts.length != 2) {
+            throw new Error("Invalid span key");
+        }
+        return [keyParts[0], keyParts[1]];
     }
 
     private buildReservationMapping(reservations: Reservation[]): Map<string, Reservation[]> {
@@ -45,7 +49,6 @@ export default class DailyReservations {
     }
 
     getSlotReservations(hour: number, minute: number): Reservation[] {
-        debugger;
         const key = this.dateToSlotKey(new Date(0, 0, 0, hour, minute));
         return this.reservationByTime.get(key) || [];
     }
@@ -61,6 +64,10 @@ export default class DailyReservations {
             return null;
         }
         return this.spanByHour.get(key) as InventorySpan;
+    }
+
+    getInventories(): InventorySpan[] {
+        return this.timeSpans;
     }
 
     getOpenCloseHours(): [number, number] {

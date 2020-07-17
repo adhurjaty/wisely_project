@@ -16,3 +16,11 @@ export function range(start: number, end?: number, step?: number): number[] {
 
     return r;
 }
+
+export function formatTime(date: Date): string {
+    const hour = date.getHours();
+    const minutes = date.getMinutes();
+    let minStr: string = (minutes < 10 ? '0' : '') + minutes;
+
+    return `${hour % 12 || 12}:${minStr} ${hour > 11 ? 'PM': 'AM'}`
+}

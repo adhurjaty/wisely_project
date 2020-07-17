@@ -22,6 +22,7 @@ function App() {
         <MainContainer>
             <Header />
             <BodyContainer>
+                <div id="modalContainer"></div>
                 <AppRouter />
             </BodyContainer>
         </MainContainer>

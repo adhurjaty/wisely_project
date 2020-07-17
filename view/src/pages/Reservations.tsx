@@ -4,6 +4,8 @@ import Calendar from 'react-calendar';
 import { getDailyReservations } from '../backend_interface/api_interface';
 import DailyReservations from '../models/DailyReservations';
 import Agenda from '../components/Agenda';
+import ReservationForm from '../components/ReservationForm';
+import Reservation from '../models/Reservation';
 
 
 interface ReservationState {
@@ -30,6 +32,13 @@ const ReservationSection = styled.div`
     display: flex;
     flex-direction: column;
     margin-left: 20px;
+`
+
+const ResButton = styled.button`
+    margin: 10px;
+    height: 40px;
+    width: 140px;
+    align-self: center;
 `
 
 function Reservations(): JSX.Element {
@@ -68,7 +77,6 @@ function Reservations(): JSX.Element {
                     value={date}
                     calendarType="US" />
             </MonthCalSection>
-
             <StateDisplay state={state} />
         </div>
     )
@@ -96,12 +104,36 @@ function ErrorDisplay(error: string): JSX.Element {
 }
 
 function ReservationDisplay(reservations: DailyReservations): JSX.Element {
+    const [showForm, setShowForm] = useState(false);
+    const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+    const [selectedTime, setSelectedTime] = useState<Date | null>(null);
+
+    let onAgendaClick = (res: Reservation | null=null, time: Date | null=null) => {
+        setSelectedReservation(res);
+        setSelectedTime(time);
+        setShowForm(true);
+    }
+
     return (
         <ReservationSection>
+            { showForm &&
+                <div>
+                    <ReservationForm timeSlots={reservations.getInventories()}
+                        reservation={selectedReservation}
+                        time={selectedTime} />
+                    <ResButton onClick={(e) => setShowForm(false)}>Close</ResButton>
+                </div>
+            ||
+                <ResButton onClick={(e) => setShowForm(true)}>
+                    Make Reservation
+                </ResButton>
+            }
             <SectionHeader>Reservation Times</SectionHeader>
-            <Agenda dailyReservations={reservations} />
+            <Agenda dailyReservations={reservations}
+                onAgendaClick={onAgendaClick} />
         </ReservationSection>
     )
 }
+
 
 export default Reservations

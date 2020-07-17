@@ -41,14 +41,24 @@ const ReservationSlot = styled.div`
     border-bottom: 1px solid lightgray;
 `
 
+interface ResItemProp {
+    capacity: number;
+}
+
 const ReservationItem = styled.div`
-    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
     background: green;
     border: 1px solid black;
     margin: 2px;
+    justify-content: center;
+    width: ${(props: ResItemProp) => 100 / props.capacity - 1}%
 `
 
-function Agenda({dailyReservations}: {dailyReservations: DailyReservations}): JSX.Element {
+function Agenda({dailyReservations, onAgendaClick}: 
+    {dailyReservations: DailyReservations, 
+     onAgendaClick: (res?: Reservation | null, time?: Date | null) => void}): JSX.Element 
+{
     const [minHour, maxHour] = dailyReservations.getOpenCloseHours();
 
     return (
@@ -56,19 +66,25 @@ function Agenda({dailyReservations}: {dailyReservations: DailyReservations}): JS
             {range(minHour, maxHour).map((h, i) => {
                 return <AgendaHour 
                             hour={h}
-                            items={dailyReservations} />
+                            items={dailyReservations}
+                            onAgendaClick={onAgendaClick}
+                            key={`agenda-hour-${i}`} />
             })}
         </AgendaContainer>
     )
 }
 
-function AgendaHour({hour, items}: {hour: number, items: DailyReservations}): 
+function AgendaHour({hour, items, onAgendaClick}: 
+    {hour: number, items: DailyReservations, 
+    onAgendaClick: (res?: Reservation | null, time?: Date | null) => void}): 
     JSX.Element
 {
     return (
         <HourBlock>
             <HourLabelBlock>{formatHour(hour)}</HourLabelBlock>
-            <AgendaSlot hour={hour} items={items} />
+            <AgendaSlot hour={hour} 
+                items={items}
+                onAgendaClick={onAgendaClick} />
         </HourBlock>
     )
 }
@@ -77,34 +93,55 @@ function formatHour(hour: number): string {
     return `${hour % 12 || 12}:00 ${hour > 11 ? 'PM': 'AM'}`
 }
 
-function AgendaSlot({hour, items}: {hour: number, items: DailyReservations}): JSX.Element {
+function AgendaSlot({hour, items, onAgendaClick}: 
+    {hour: number, items: DailyReservations, 
+    onAgendaClick: (res?: Reservation | null, time?: Date | null) => void}): JSX.Element 
+{
     const slots = 60 / SLOT_DURATION;
+    const invSlot = items.getInventoryAtHour(hour);
 
     return (
         <HourItemsContainer>
             {range(slots).map((i) => {
                 let minute = i * SLOT_DURATION;
+                let capacity = invSlot && invSlot.numParties || 0;
                 return <AgendaItems items={items.getSlotReservations(hour, minute)}
+                            capacity={capacity}
+                            onAgendaClick={onAgendaClick}
                             key={`agendaItem-${i}`} />
             })}
         </HourItemsContainer>
     )
 }
 
-function AgendaItems({items}: {items: Reservation[]}): JSX.Element {
+function AgendaItems({items, capacity, onAgendaClick}:
+    {items: Reservation[], capacity: number,
+    onAgendaClick: (res?: Reservation | null, time?: Date | null) => void}): JSX.Element 
+{
     return (
         <ReservationSlot>
-            {items.map((item, i) => AgendaItem({item}))}
+            {items.map((item, i) => (
+                <AgendaItem item={item}
+                    capacity={capacity}
+                    onAgendaClick={onAgendaClick}
+                    key={`agenda-item-${i}`} />
+            ))}
         </ReservationSlot>
     )
 }
 
-function AgendaItem({item, color}: {item: Reservation, color?: string}): JSX.Element {
+function AgendaItem({item, capacity, onAgendaClick, color}: 
+    {item: Reservation, capacity: number,
+    onAgendaClick: (res?: Reservation | null, time?: Date | null) => void,
+    color?: string}): JSX.Element 
+{
     return (
-        <ReservationItem>
+        <ReservationItem capacity={capacity}
+                onClick={(e) => onAgendaClick(item)}>
             {`${item.name} party of ${item.partySize}`}
         </ReservationItem>
     )
 }
+
 
 export default Agenda
