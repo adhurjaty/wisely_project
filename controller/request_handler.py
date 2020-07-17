@@ -21,7 +21,7 @@ def set_controller():
     g.controller = ControllerFactory.create()
 
 
-@app.route(INVENTORY_ROUTE, methods=['GET'])
+@app.route(INVENTORY_ROUTE)
 def get_inventory():
     try:
         # get inventory from start to end dates 
@@ -38,6 +38,17 @@ def get_inventory():
     except Exception as e:
         pass
 
+
+@app.route(RESERVATIONS_ROUTE)
+def get_reservations():
+    try:
+        day = request.args.get('day')
+        if not day:
+            raise Exception('Must specify day')
+            
+        reservations = g.controller.get_reservations(day)
+    except Exception as e:
+        pass
 
 @app.route(RESERVATIONS_ROUTE, methods=['POST'])
 def make_reservation():
@@ -56,8 +67,6 @@ def update_reservation():
     except Exception as e:
         pass
 
-
-@app.route()
 
 
 def show_success():
