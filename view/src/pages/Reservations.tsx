@@ -112,16 +112,23 @@ function ReservationDisplay(reservations: DailyReservations): JSX.Element {
         setSelectedReservation(res);
         setSelectedTime(time);
         setShowForm(true);
-    }
+    };
+
+    let closeForm = () => {
+        setSelectedReservation(null);
+        setSelectedTime(null);
+        setShowForm(false);
+    };
 
     return (
         <ReservationSection>
             { showForm &&
-                <div>
-                    <ReservationForm timeSlots={reservations.getInventories()}
+                <div id="reservationForm">
+                    <ReservationForm
+                        timeSlots={reservations.getInventories()}
                         reservation={selectedReservation}
                         time={selectedTime} />
-                    <ResButton onClick={(e) => setShowForm(false)}>Close</ResButton>
+                    <ResButton onClick={(e) => closeForm()}>Close</ResButton>
                 </div>
             ||
                 <ResButton onClick={(e) => setShowForm(true)}>

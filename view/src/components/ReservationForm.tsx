@@ -41,12 +41,31 @@ const FieldError = styled.div`
     margin-top: 5px;
 `
 
+const SubmitButton = styled.button`
+    margin-left: 20px;
+    margin-top: 10px;
+    height: 30px;
+    width: 80px;
+`
+
+const DeleteButton = styled.button`
+    background: red;
+    color: white;
+    margin-left: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    height: 30px;
+    width: 80px;
+`
+
 function ReservationForm({timeSlots, reservation, time}: 
     {timeSlots: InventorySpan[], reservation: Reservation | null, time: Date | null}): 
     JSX.Element
 {
     const [nameError, setNameError] = useState("");
     const [emailError, setEmailError] = useState("");
+
+    const isEditing = !!reservation;
 
     if(reservation) {
         time = reservation.time;
@@ -56,7 +75,7 @@ function ReservationForm({timeSlots, reservation, time}:
 
     return (
         <Container>
-            <h4>Reservation form</h4>
+            <h4>{isEditing ? "Edit Reservation" : "Make Reservation"}</h4>
             <SectionsContainer>
                 <NameSection reservation={reservation}
                     error={nameError} />
@@ -66,6 +85,8 @@ function ReservationForm({timeSlots, reservation, time}:
                 <TimeSection reservation={reservation}
                     timeSlots={timeSlots} />
             </SectionsContainer>
+            { isEditing && <DeleteButton>Delete</DeleteButton>}
+            <SubmitButton>{isEditing && "Update" || "Create"}</SubmitButton>
         </Container>
     )
 }
@@ -82,6 +103,10 @@ function NameSection({reservation, error}: {reservation: Reservation, error: str
     useEffect(() => {
         reservation.name = name;
     }, [name])
+
+    useEffect(() => {
+        setName(reservation.name);
+    }, [reservation]);
 
     return (
         <InputSection>
@@ -102,7 +127,11 @@ function EmailSection({reservation, error}: {reservation: Reservation, error: st
 
     useEffect(() => {
         reservation.email = email;
-    }, [email])
+    }, [email]);
+
+    useEffect(() => {
+        setEmail(reservation.email);
+    }, [reservation]);
 
     return (
         <InputSection>
@@ -122,6 +151,10 @@ function PartySizeSection({reservation}: {reservation: Reservation}): JSX.Elemen
     useEffect(() => {
         reservation.partySize = partySize;
     }, [partySize]);
+
+    useEffect(() => {
+        setPartySize(reservation.partySize);
+    }, [reservation]);
 
     return (
         <InputSection>
@@ -148,6 +181,10 @@ function TimeSection({reservation, timeSlots}:
     useEffect(() => {
         reservation.time = time
     }, [time]);
+
+    useEffect(() => {
+        setTime(reservation.time);
+    }, [reservation]);
 
     return (
         <InputSection>
