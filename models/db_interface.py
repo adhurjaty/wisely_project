@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from util.utils import get_config
+from utils.util import get_config
 from .base import Base
 
 
@@ -25,4 +25,3 @@ class DBInterface:
 
     def save(self):
         self.session.commit()
-        
