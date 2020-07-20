@@ -1,4 +1,5 @@
 from flask import Flask, request, g, redirect, make_response
+from flask_cors import CORS
 
 from .controller_factory import ControllerFactory
 
@@ -12,6 +13,10 @@ app = Flask(__name__)
 
 def create_app() -> Flask:
     global app
+
+    CORS(app, origins=[
+        r'https?:\/\/localhost[^\.]*$',
+        r'https?:\/\/ui[^\.]*$'])
 
     return app
 

@@ -1,6 +1,8 @@
 import InventorySpan from "../models/InventorySpan";
 import DailyReservations from "../models/DailyReservations";
 import Reservation from "../models/Reservation";
+import { API_RESERVATIONS } from "./api_endpoints";
+import { formatDay } from "../helpers";
 
 
 export interface StatusMessage {
@@ -62,26 +64,39 @@ export async function getDailyReservations(day: Date): Promise<DailyReservations
 }
 
 async function getDayReservations(day: Date): Promise<Reservation[]> {
-    let r1 = new Reservation();
-    r1.id = 'a';
-    r1.name = 'Anil';
-    r1.email = 'anil@example.com';
-    r1.partySize = 3;
-    r1.time = new Date(2020, 7, 15, 12, 15);
+    // let r1 = new Reservation();
+    // r1.id = 'a';
+    // r1.name = 'Anil';
+    // r1.email = 'anil@example.com';
+    // r1.partySize = 3;
+    // r1.time = new Date(2020, 7, 15, 12, 15);
 
-    let r2 = new Reservation();
-    r2.id = 'b';
-    r2.name = 'Aimee';
-    r2.email = 'aimee@example.com';
-    r2.partySize = 6;
-    r2.time = new Date(2020, 7, 15, 12, 15);
+    // let r2 = new Reservation();
+    // r2.id = 'b';
+    // r2.name = 'Aimee';
+    // r2.email = 'aimee@example.com';
+    // r2.partySize = 6;
+    // r2.time = new Date(2020, 7, 15, 12, 15);
 
-    let r3 = new Reservation();
-    r3.id = 'c';
-    r3.name = 'Jordan';
-    r3.email = 'jordan@example.com';
-    r3.partySize = 2;
-    r3.time = new Date(2020, 7, 15, 18, 45);
+    // let r3 = new Reservation();
+    // r3.id = 'c';
+    // r3.name = 'Jordan';
+    // r3.email = 'jordan@example.com';
+    // r3.partySize = 2;
+    // r3.time = new Date(2020, 7, 15, 18, 45);
 
-    return [r1, r2, r3]
+    // return [r1, r2, r3]
+    const req = new Request(API_RESERVATIONS(formatDay(day)), {method: 'GET'});
+    const response = await fetch(req);
+    const respJson = await response.json() as any;
+
+    if(!respJson.reservations) {
+        throw new Error("Invalid reservations response")
+    }
+
+    const reservations: Reservation[] = []
+    for (const respRow of respJson.reservations as any[]) {
+        reservations.push(new Reservation().fromJson(respRow));
+    }
+    return reservations;
 }

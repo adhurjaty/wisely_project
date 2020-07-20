@@ -3,4 +3,4 @@ const API_PREFIX = process.env.NODE_ENV === 'development'
     : '/api';
 
 export const API_RESERVATION = (id: string) => `${API_PREFIX}/reservations/${id}`;
-export const API_RESERVATIONS = `${API_PREFIX}/reservations`
+export const API_RESERVATIONS = (day: string) => `${API_PREFIX}/reservations?day=${day}`

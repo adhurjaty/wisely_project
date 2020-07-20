@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from typing import List
 
 from .base import Base
 from .reservation import Reservation
@@ -34,8 +35,8 @@ class DBInterface:
         start_date = format_date(day)
         end_date = format_date(day + timedelta(days=1))
         return self.session.query(Reservation)\
-            .filter(Reservation.time >= start_date and Reservation.time < end_date)\
-            .fetchall()
+            .filter(Reservation.time >= start_date, Reservation.time < end_date)\
+            .all()
 
     def get_reservation(self, id: str) -> Reservation:
         return self.session.query(Reservation).get(id)

@@ -24,3 +24,7 @@ export function formatTime(date: Date): string {
 
     return `${hour % 12 || 12}:${minStr} ${hour > 11 ? 'PM': 'AM'}`
 }
+
+export function formatDay(date: Date): string {
+    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+}
