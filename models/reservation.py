@@ -11,7 +11,10 @@ class Reservation(Base):
     time = Column(DateTime())
     party_size = Column(Integer())
 
-    def __init__(self, name='', email='', time=None, party_size=0, **kwargs):
+    def __init__(self, **kwargs):
+        self.update_fields(**kwargs)
+
+    def update_fields(self, name='', email='', time=None, party_size=0, **kwargs):
         self.name = name
         self.email = email
         self.time = time

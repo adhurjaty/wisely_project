@@ -1,8 +1,11 @@
+from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from utils.util import get_config
 from .base import Base
+from .reservation import Reservation
+from .inventory import Inventory
+from utils.util import get_config, format_date
 
 
 config = get_config()
@@ -22,6 +25,20 @@ class DBInterface:
     def insert(self, model: Base):
         self.session.add(model)
         self.save()
+        return model
 
     def save(self):
         self.session.commit()
+
+    def get_reservations_on_day(self, day: datetime) -> List[Reservation]:
+        start_date = format_date(day)
+        end_date = format_date(day + timedelta(days=1))
+        return self.session.query(Reservation)\
+            .filter(Reservation.time >= start_date and Reservation.time < end_date)\
+            .fetchall()
+
+    def get_reservation(self, id: str) -> Reservation:
+        return self.session.query(Reservation).get(id)
+
+    def delete_reservation(self, id: str):
+        self.session.query(Reservation).filter(Reservation.id == id).delete()
