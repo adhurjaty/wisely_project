@@ -21,10 +21,10 @@ class ViewModel:
 
     def reservations(self, res_list: List[Reservation]) -> dict:
         return {
-            'reservations': [self._reservation(res) for res in res_list]
+            'reservations': [self.reservation(res) for res in res_list]
         }
 
-    def _reservation(res: Reservation) -> dict:
+    def reservation(self, res: Reservation) -> dict:
         return {
             'id': str(res.id),
             'name': res.name,

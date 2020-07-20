@@ -32,8 +32,7 @@ class DBInterface:
         self.session.commit()
 
     def get_reservations_on_day(self, day: datetime) -> List[Reservation]:
-        start_date = format_date(day)
-        end_date = format_date(day + timedelta(days=1))
+        start_date, end_date = self._day_span(day)
         return self.session.query(Reservation)\
             .filter(Reservation.time >= start_date, Reservation.time < end_date)\
             .all()
@@ -43,3 +42,12 @@ class DBInterface:
 
     def delete_reservation(self, id: str):
         self.session.query(Reservation).filter(Reservation.id == id).delete()
+
+    def get_inventories(self, day: datetime) -> List[Inventory]:
+        start, end = self._day_span(day)
+        return self.session.query(Inventory)\
+            .filter(Inventory.start_time >= start, Inventory.start_time < end)\
+            .all()
+
+    def _day_span(self, day: datetime) -> (str, str):
+        return format_date(day), format_date(day + timedelta(days=1))

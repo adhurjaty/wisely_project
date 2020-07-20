@@ -3,15 +3,16 @@ from datetime import datetime
 from uuid import UUID
 from typing import List
 
+from .view_model import ViewModel
 from models.db_interface import DBInterface
 from models.inventory import Inventory
 from models.reservation import Reservation
 
 class Controller:
     db_int: DBInterface = None
-    view_model = None
+    view_model: ViewModel = None
 
-    def __init__(self, db_int: DBInterface, vm):
+    def __init__(self, db_int: DBInterface, vm: ViewModel):
         self.db_int = db_int
         self.view_model = vm
 

@@ -1,7 +1,7 @@
 import InventorySpan from "../models/InventorySpan";
 import DailyReservations from "../models/DailyReservations";
 import Reservation from "../models/Reservation";
-import { API_RESERVATIONS } from "./api_endpoints";
+import { API_GET_RESERVATIONS, API_INVENTORIES, API_RESERVATIONS, API_RESERVATION } from "./api_endpoints";
 import { formatDay } from "../helpers";
 
 
@@ -24,6 +24,19 @@ export async function getInventory(day: Date): Promise<InventorySpan[]> {
     inv2.numParties = 6;
 
     return [inv1, inv2]
+    // const req = new Request(API_INVENTORIES(formatDay(day)), {method: 'GET'});
+    // const response = await fetch(req);
+    // const respJson = await response.json() as any;
+
+    // if(!respJson.inventories) {
+    //     throw new Error("Invalid inventories response")
+    // }
+
+    // const inventories: InventorySpan[] = []
+    // for (const respRow of respJson.inventories as any[]) {
+    //     inventories.push(new InventorySpan().fromJson(respRow));
+    // }
+    // return inventories;
 }
 
 export async function createInventorySpan(): Promise<StatusMessage> {
@@ -33,18 +46,28 @@ export async function createInventorySpan(): Promise<StatusMessage> {
     }
 }
 
-export async function makeReservation(reservation: Reservation): Promise<StatusMessage> {
-    return {
-        status: 'success',
-        message: 'success'
-    }
+export async function makeReservation(reservation: Reservation): Promise<Reservation> {
+    const req = new Request(API_RESERVATIONS, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(reservation.toJson())
+    });
+    const response = await fetch(req);
+    const respJson = await response.json() as any;
+
+    return new Reservation().fromJson(respJson);
 }
 
-export async function updateReservation(reservation: Reservation): Promise<StatusMessage> {
-    return {
-        status: 'success',
-        message: 'success'
-    }
+export async function updateReservation(reservation: Reservation): Promise<Reservation> {
+    const req = new Request(API_RESERVATION(reservation.id), {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(reservation.toJson())
+    });
+    const response = await fetch(req);
+    const respJson = await response.json() as any;
+
+    return new Reservation().fromJson(respJson);
 }
 
 export async function deleteReservation(reservation: Reservation): Promise<StatusMessage> {
@@ -86,7 +109,7 @@ async function getDayReservations(day: Date): Promise<Reservation[]> {
     // r3.time = new Date(2020, 7, 15, 18, 45);
 
     // return [r1, r2, r3]
-    const req = new Request(API_RESERVATIONS(formatDay(day)), {method: 'GET'});
+    const req = new Request(API_GET_RESERVATIONS(formatDay(day)), {method: 'GET'});
     const response = await fetch(req);
     const respJson = await response.json() as any;
 

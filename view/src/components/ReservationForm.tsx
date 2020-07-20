@@ -108,8 +108,9 @@ function ReservationForm({timeSlots, reservation, time}:
         }
 
         apiRequest(reservation).then(result => {
-            if(result.status == "error") {
-                setRequestError(result.message);
+            debugger;
+            if(!result.id) {
+                setRequestError(`Error ${isEditing ? "updating" : "creating"} reservation`);
             } else {
                 setSuccessMessage("success");
             }

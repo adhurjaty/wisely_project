@@ -10,7 +10,7 @@ export default class Reservation {
     id: string = "";
     name: string = "";
     email: string = "";
-    partySize: number = 0;
+    partySize: number = 1;
     time: Date = new Date();
 
     fromJson(resp: ReservationResponse): Reservation {
@@ -20,5 +20,15 @@ export default class Reservation {
         this.partySize = resp.partySize;
         this.time = new Date(resp.time);
         return this
+    }
+
+    toJson() {
+        return {
+            id: this.id,
+            name: this.name,
+            email: this.email,
+            party_size: this.partySize,
+            time: this.time.toISOString()
+        }
     }
 }
