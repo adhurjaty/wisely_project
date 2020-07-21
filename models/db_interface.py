@@ -6,7 +6,7 @@ from typing import List
 from .base import Base
 from .reservation import Reservation
 from .inventory import Inventory
-from utils.util import get_config, format_date
+from utils.util import get_config, format_date_tz
 
 
 config = get_config()
@@ -56,9 +56,9 @@ class DBInterface:
             .all()
 
     def _day_span(self, day: datetime) -> (str, str):
-        return format_date(day), format_date(day + timedelta(days=1))
+        return format_date_tz(day), format_date_tz(day + timedelta(days=1))
 
-    def delete_inventories_on_day(self, d: date):
+    def delete_inventories_on_day(self, d: datetime):
         end_time = d + timedelta(days=1)
         self.session.query(Inventory).filter(Inventory.start_time > d, 
             Inventory.start_time < end_time).delete()

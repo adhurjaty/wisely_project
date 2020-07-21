@@ -1,7 +1,8 @@
 import arrow
-from datetime import datetime
-from uuid import UUID
+from datetime import datetime, timedelta
+from time import timezone
 from typing import List
+from uuid import UUID
 
 from .view_model import ViewModel
 from models.db_interface import DBInterface
@@ -17,7 +18,7 @@ class Controller:
         self.view_model = vm
 
     def get_inventories(self, day: str) -> List[dict]:
-        date = arrow.get(day).datetime
+        date = self._get_tz_day(day)
         inventories = self.db_int.get_inventories(date)
         return self.view_model.inventories(inventories)
 
@@ -26,9 +27,13 @@ class Controller:
             raise Exception('Invalid inventory list - empty')
 
         inventories = [Inventory(**inv) for inv in inv_list]
-        date = arrow.get(inventories[0].start_time).date()
+        date = self._get_tz_day(inventories[0].start_time)
         self.db_int.delete_inventories_on_day(date)
         self.db_int.list_insert(inventories)
+
+    def _get_tz_day(self, time: str) -> datetime:
+        date = arrow.get(time).date()
+        return datetime(date.year, date.month, date.day)
 
     def make_reservation(self, **reservation_info):
         reservation = Reservation(**reservation_info)

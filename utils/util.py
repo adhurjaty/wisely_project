@@ -1,7 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import os
 from pathlib import Path
+import pytz
+from time import timezone
 
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -17,4 +19,10 @@ def get_config() -> dict:
 def format_date(d: datetime) -> str:
     return d.strftime('%Y-%m-%dT%H:%M:%SZ')
 
+def format_date_tz(d: datetime) -> str:
+    d += timedelta(seconds=timezone) - timedelta(hours=int(is_dst()))
+    return d.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+def is_dst():
+    return bool(datetime.now(pytz.timezone('America/Los_Angeles')).dst())
 

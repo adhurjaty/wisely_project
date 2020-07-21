@@ -124,6 +124,10 @@ function InventoryDisplay(state: InventoryState, date: Date,
     const [showAddButton, setShowAdd] = useState(maxEndTimeHour(state.timeSlots) < 24);
     const [submitEnabled, setSubmitEnabled] = useState(state.timeSlots.length > 0);
 
+    useEffect(() => {
+        setTimeSlots(state.timeSlots);
+    }, [state]);
+
     const onDelete = (ts: InventorySpan) => {
         const newSlots = timeSlots.filter(x => x !== ts);
         setTimeSlots(newSlots);
@@ -174,6 +178,7 @@ function InventoryDisplay(state: InventoryState, date: Date,
     }
 
     const submit = () => {
+        debugger;
         setInventory(timeSlots).then(resp => {
             if(resp.status == 'success')
                 onSubmit();
