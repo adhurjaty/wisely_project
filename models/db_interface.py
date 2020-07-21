@@ -59,6 +59,6 @@ class DBInterface:
         return format_date_tz(day), format_date_tz(day + timedelta(days=1))
 
     def delete_inventories_on_day(self, d: datetime):
-        end_time = d + timedelta(days=1)
-        self.session.query(Inventory).filter(Inventory.start_time > d, 
-            Inventory.start_time < end_time).delete()
+        start, end = self._day_span(d)
+        self.session.query(Inventory).filter(Inventory.start_time >= start, 
+            Inventory.start_time < end).delete()

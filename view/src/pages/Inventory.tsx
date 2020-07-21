@@ -178,7 +178,6 @@ function InventoryDisplay(state: InventoryState, date: Date,
     }
 
     const submit = () => {
-        debugger;
         setInventory(timeSlots).then(resp => {
             if(resp.status == 'success')
                 onSubmit();
