@@ -41,7 +41,8 @@ def get_inventories():
 @app.route(INVENTORY_ROUTE, methods=['POST'])
 def set_inventories():
     try:
-        g.controller.set_inventories(request.json.get('inventories'))
+        g.controller.set_inventories(request.json.get('inventory'))
+        return show_success()
     except Exception as e:
         return show_error(str(e))
 

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from typing import List
@@ -28,6 +28,11 @@ class DBInterface:
         self.save()
         return model
 
+    def list_insert(self, models: List[Base]):
+        for model in models:
+            self.session.add(model)
+        self.save()
+
     def save(self):
         self.session.commit()
 
@@ -52,3 +57,8 @@ class DBInterface:
 
     def _day_span(self, day: datetime) -> (str, str):
         return format_date(day), format_date(day + timedelta(days=1))
+
+    def delete_inventories_on_day(self, d: date):
+        end_time = d + timedelta(days=1)
+        self.session.query(Inventory).filter(Inventory.start_time > d, 
+            Inventory.start_time < end_time).delete()

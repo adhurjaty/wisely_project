@@ -21,6 +21,15 @@ class Controller:
         inventories = self.db_int.get_inventories(date)
         return self.view_model.inventories(inventories)
 
+    def set_inventories(self, inv_list: List[dict]):
+        if len(inv_list) == 0:
+            raise Exception('Invalid inventory list - empty')
+
+        inventories = [Inventory(**inv) for inv in inv_list]
+        date = arrow.get(inventories[0].start_time).date()
+        self.db_int.delete_inventories_on_day(date)
+        self.db_int.list_insert(inventories)
+
     def make_reservation(self, **reservation_info):
         reservation = Reservation(**reservation_info)
         reservation = self.db_int.insert(reservation)

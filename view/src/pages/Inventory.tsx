@@ -144,7 +144,7 @@ function InventoryDisplay(state: InventoryState, date: Date,
                 continue;
             }
 
-            const newSlot = new InventorySpan().fromJson(slot);
+            const newSlot = slot.copy();
             if(mustMoveStartTime(ts, slot)) {
                 newSlot.startTime = new Date(ts.endTime.getTime());
             }

@@ -1,7 +1,7 @@
 interface InventoryResponse {
     id: string;
-    startTime: Date;
-    endTime: Date;
+    startTime: string;
+    endTime: string;
     numParties: number;
 }
 
@@ -9,12 +9,12 @@ export default class InventorySpan {
     id: string = "";
     startTime: Date = new Date();
     endTime: Date = new Date();
-    numParties: number = 0;
+    numParties: number = 1;
 
     fromJson(resp: InventoryResponse): InventorySpan {
         this.id = resp.id;
-        this.startTime = resp.startTime;
-        this.endTime = resp.endTime;
+        this.startTime = new Date(resp.startTime);
+        this.endTime = new Date(resp.endTime);
         this.numParties = resp.numParties;
 
         return this;
@@ -29,4 +29,14 @@ export default class InventorySpan {
         }
     }
 
+    copy() {
+        const newOne = new InventorySpan();
+
+        newOne.id = this.id;
+        newOne.startTime = this.startTime;
+        newOne.endTime = this.endTime;
+        newOne.numParties = this.numParties;
+
+        return newOne;
+    }
 }
