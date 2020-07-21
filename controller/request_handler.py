@@ -38,6 +38,14 @@ def get_inventories():
         return show_error(str(e))
 
 
+@app.route(INVENTORY_ROUTE, methods=['POST'])
+def set_inventories():
+    try:
+        g.controller.set_inventories(request.json.get('inventories'))
+    except Exception as e:
+        return show_error(str(e))
+
+
 @app.route(RESERVATIONS_ROUTE)
 def get_reservations():
     try:

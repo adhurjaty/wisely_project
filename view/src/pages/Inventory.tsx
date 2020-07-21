@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import Calendar from 'react-calendar';
 import DayCalendar from '../components/DayCalendar';
 import InventorySpan from '../models/InventorySpan';
-import { getInventory } from '../backend_interface/api_interface';
+import { getInventory, setInventory } from '../backend_interface/api_interface';
 import { range, formatTime } from '../helpers';
 import { MAX_PARTY_SIZE } from '../constants';
 
@@ -46,6 +46,12 @@ const LabelledInputContainer = styled.div`
 
 const SideLabel = styled.div`
     margin-right: 5px;
+`
+
+const SubmitButton = styled.button`
+    margin-top: 30px;
+    width: 75px;
+    height: 30px;
 `
 
 function Inventory(): JSX.Element {
@@ -116,11 +122,13 @@ function InventoryDisplay(state: InventoryState, date: Date,
 {
     const [timeSlots, setTimeSlots] = useState(state.timeSlots);
     const [showAddButton, setShowAdd] = useState(maxEndTimeHour(state.timeSlots) < 24);
+    const [submitEnabled, setSubmitEnabled] = useState(state.timeSlots.length > 0);
 
     const onDelete = (ts: InventorySpan) => {
         const newSlots = timeSlots.filter(x => x !== ts);
         setTimeSlots(newSlots);
         setShowAdd(maxEndTimeHour(newSlots) < 24);
+        setSubmitEnabled(newSlots.length > 0);
     };
 
     // adjust other time spans so no overlapping
@@ -162,6 +170,14 @@ function InventoryDisplay(state: InventoryState, date: Date,
         newSlot.endTime.setHours(newSlot.endTime.getHours() + 1);
 
         setTimeSlots(timeSlots.concat([newSlot]));
+        setSubmitEnabled(true);
+    }
+
+    const submit = () => {
+        setInventory(timeSlots).then(resp => {
+            if(resp.status == 'success')
+                onSubmit();
+        });
     }
 
     return (
@@ -173,6 +189,10 @@ function InventoryDisplay(state: InventoryState, date: Date,
                     key={`slots-${i}`} />
             ))}
             {showAddButton && <button onClick={(e) => onAdd()}>Add</button>}
+            <SubmitButton onClick={submit}
+                disabled={!submitEnabled}>
+                Submit
+            </SubmitButton>
         </SlotsContainer>
     )
 }

@@ -20,4 +20,13 @@ export default class InventorySpan {
         return this;
     }
 
+    toJson(): any {
+        return {
+            id: this.id,
+            start_time: this.startTime,
+            end_time: this.endTime,
+            num_parties: this.numParties
+        }
+    }
+
 }

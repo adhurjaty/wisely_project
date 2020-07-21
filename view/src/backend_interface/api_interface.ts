@@ -1,7 +1,7 @@
 import InventorySpan from "../models/InventorySpan";
 import DailyReservations from "../models/DailyReservations";
 import Reservation from "../models/Reservation";
-import { API_GET_RESERVATIONS, API_INVENTORIES, API_RESERVATIONS, API_RESERVATION } from "./api_endpoints";
+import { API_GET_RESERVATIONS, API_INVENTORIES, API_DAY_INVENTORIES, API_RESERVATIONS, API_RESERVATION } from "./api_endpoints";
 import { formatDay } from "../helpers";
 
 
@@ -11,39 +11,42 @@ export interface StatusMessage {
 }
 
 export async function getInventory(day: Date): Promise<InventorySpan[]> {
-    let inv1 = new InventorySpan();
-    inv1.id = 'foo';
-    inv1.startTime = new Date(2020, 6, 20, 10, 0);
-    inv1.endTime = new Date(2020, 6, 20, 17, 0);
-    inv1.numParties = 3;
+    // let inv1 = new InventorySpan();
+    // inv1.id = 'foo';
+    // inv1.startTime = new Date(2020, 6, 20, 10, 0);
+    // inv1.endTime = new Date(2020, 6, 20, 17, 0);
+    // inv1.numParties = 3;
 
-    let inv2 = new InventorySpan();
-    inv2.id = 'bar';
-    inv2.startTime = new Date(2020, 6, 20, 17, 0);
-    inv2.endTime = new Date(2020, 6, 20, 22, 0);
-    inv2.numParties = 6;
+    // let inv2 = new InventorySpan();
+    // inv2.id = 'bar';
+    // inv2.startTime = new Date(2020, 6, 20, 17, 0);
+    // inv2.endTime = new Date(2020, 6, 20, 22, 0);
+    // inv2.numParties = 6;
 
-    return [inv1, inv2]
-    // const req = new Request(API_INVENTORIES(formatDay(day)), {method: 'GET'});
-    // const response = await fetch(req);
-    // const respJson = await response.json() as any;
+    // return [inv1, inv2]
+    const req = new Request(API_DAY_INVENTORIES(formatDay(day)), {method: 'GET'});
+    const response = await fetch(req);
+    const respJson = await response.json() as any;
 
-    // if(!respJson.inventories) {
-    //     throw new Error("Invalid inventories response")
-    // }
+    if(!respJson.inventories) {
+        throw new Error("Invalid inventories response")
+    }
 
-    // const inventories: InventorySpan[] = []
-    // for (const respRow of respJson.inventories as any[]) {
-    //     inventories.push(new InventorySpan().fromJson(respRow));
-    // }
-    // return inventories;
+    const inventories: InventorySpan[] = []
+    for (const respRow of respJson.inventories as any[]) {
+        inventories.push(new InventorySpan().fromJson(respRow));
+    }
+    return inventories;
 }
 
-export async function createInventorySpan(): Promise<StatusMessage> {
-    return {
-        status: 'success',
-        message: 'success'
-    }
+export async function setInventory(spans: InventorySpan[]): Promise<StatusMessage> {
+    const req = new Request(API_INVENTORIES, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({inventory: spans.map(s => s.toJson())})
+    });
+    const response = await fetch(req);
+    return await response.json() as StatusMessage;
 }
 
 export async function makeReservation(reservation: Reservation): Promise<Reservation> {
