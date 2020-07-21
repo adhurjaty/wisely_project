@@ -57,8 +57,8 @@ def make_reservation():
         return show_error(str(e))
 
 
-@app.route(RESERVATION_ROUTE, methods=['PUT'])
-def update_reservation():
+@app.route(RESERVATION_ROUTE, methods=['PATCH'])
+def update_reservation(reservation_id):
     try:
         return g.controller.update_reservation(**request.json)
     except Exception as e:

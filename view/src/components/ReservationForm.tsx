@@ -134,7 +134,7 @@ function ReservationForm({dailyReservations, reservation, time, onSubmit}:
     const onTimeChange = (time: Date) => {
         const slots = GetRemainingSlots(dailyReservations, time);
         setRemainingSlots(slots);
-        setSubmitEnabled(slots > 0);
+        setSubmitEnabled(slots > 0 || isEditing);
     }
 
     return (

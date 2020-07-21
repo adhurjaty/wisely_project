@@ -59,8 +59,9 @@ export async function makeReservation(reservation: Reservation): Promise<Reserva
 }
 
 export async function updateReservation(reservation: Reservation): Promise<Reservation> {
+    debugger;
     const req = new Request(API_RESERVATION(reservation.id), {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(reservation.toJson())
     });

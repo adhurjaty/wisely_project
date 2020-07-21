@@ -34,6 +34,7 @@ class Controller:
     def update_reservation(self, id: str='', **reservation_info) -> dict:
         reservation = self.db_int.get_reservation(id)
         reservation.update_fields(**reservation_info)
+        self.db_int.save()
         return self.view_model.reservation(reservation)
 
     def delete_reservation(self, id: str):
