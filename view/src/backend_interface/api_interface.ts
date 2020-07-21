@@ -59,7 +59,6 @@ export async function makeReservation(reservation: Reservation): Promise<Reserva
 }
 
 export async function updateReservation(reservation: Reservation): Promise<Reservation> {
-    debugger;
     const req = new Request(API_RESERVATION(reservation.id), {
         method: 'PATCH',
         headers: {'Content-Type': 'application/json'},
@@ -72,6 +71,12 @@ export async function updateReservation(reservation: Reservation): Promise<Reser
 }
 
 export async function deleteReservation(reservation: Reservation): Promise<StatusMessage> {
+    const req = new Request(API_RESERVATION(reservation.id), {
+        method: 'DELETE'
+    });
+    
+    await fetch(req);
+
     return {
         status: 'success',
         message: 'success'

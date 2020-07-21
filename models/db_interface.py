@@ -42,6 +42,7 @@ class DBInterface:
 
     def delete_reservation(self, id: str):
         self.session.query(Reservation).filter(Reservation.id == id).delete()
+        self.save()
 
     def get_inventories(self, day: datetime) -> List[Inventory]:
         start, end = self._day_span(day)

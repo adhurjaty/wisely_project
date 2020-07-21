@@ -128,7 +128,12 @@ function ReservationForm({dailyReservations, reservation, time, onSubmit}:
             return;
         }
 
-        deleteReservation(reservation);
+        deleteReservation(reservation).then((resp) => {
+            if(resp.status == 'success')
+                onSubmit();
+            else
+                setRequestError(resp.message);
+        });
     }
 
     const onTimeChange = (time: Date) => {

@@ -65,6 +65,14 @@ def update_reservation(reservation_id):
         return show_error(str(e))
 
 
+@app.route(RESERVATION_ROUTE, methods=['DELETE'])
+def delete_reservation(reservation_id):
+    try:
+        g.controller.delete_reservation(reservation_id)
+        return show_success()
+    except Exception as e:
+        return show_error(str(e))
+
 def show_success():
     return {
         'status': 'success',
