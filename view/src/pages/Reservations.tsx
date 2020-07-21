@@ -6,6 +6,7 @@ import DailyReservations from '../models/DailyReservations';
 import Agenda from '../components/Agenda';
 import ReservationForm from '../components/ReservationForm';
 import Reservation from '../models/Reservation';
+import DayCalendar from '../components/DayCalendar';
 
 
 interface ReservationState {
@@ -64,23 +65,16 @@ function Reservations(): JSX.Element {
             })
         })
     };
-    
+
     useEffect(() => {
         loadReservations(date);
     }, [date])
 
-    let setCalendarDate = (d: Date | Date[]) => setDate(d as Date);
-
     return (
         <div>
             <h1>Reservations</h1>
-            <MonthCalSection>
-                <h3>Choose a day...</h3>
-                <Calendar 
-                    onChange={setCalendarDate}
-                    value={date}
-                    calendarType="US" />
-            </MonthCalSection>
+            <DayCalendar date={date}
+                setDate={setDate} />
             <StateDisplay state={state}
                 onSubmit={() => loadReservations(date)} />
         </div>
