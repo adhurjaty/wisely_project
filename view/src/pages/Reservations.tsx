@@ -49,8 +49,8 @@ function Reservations(): JSX.Element {
     });
     let [date, setDate] = useState(new Date());
 
-    useEffect(() => {
-        getDailyReservations(date).then((dailyRes) => {
+    const loadReservations = (d: Date) => {
+        getDailyReservations(d).then((dailyRes) => {
             setState({
                 isLoading: false,
                 dailyReservations: dailyRes,
@@ -63,6 +63,10 @@ function Reservations(): JSX.Element {
                 error: err.toString()
             })
         })
+    };
+    
+    useEffect(() => {
+        loadReservations(date);
     }, [date])
 
     let setCalendarDate = (d: Date | Date[]) => setDate(d as Date);
@@ -77,12 +81,15 @@ function Reservations(): JSX.Element {
                     value={date}
                     calendarType="US" />
             </MonthCalSection>
-            <StateDisplay state={state} />
+            <StateDisplay state={state}
+                onSubmit={() => loadReservations(date)} />
         </div>
     )
 }
 
-function StateDisplay({state}: {state: ReservationState}): JSX.Element {
+function StateDisplay({state, onSubmit}: {state: ReservationState, 
+    onSubmit: () => void}): JSX.Element 
+{
     if(state.isLoading) {
         return IsLoadingDisplay();
     }
@@ -92,7 +99,7 @@ function StateDisplay({state}: {state: ReservationState}): JSX.Element {
     if(!state.dailyReservations) {
         throw new Error("Empty reservations object");
     }
-    return ReservationDisplay(state.dailyReservations);
+    return ReservationDisplay(state.dailyReservations, onSubmit);
 }
 
 function IsLoadingDisplay(): JSX.Element {
@@ -103,7 +110,9 @@ function ErrorDisplay(error: string): JSX.Element {
     return <ErrorText>{error}</ErrorText>
 }
 
-function ReservationDisplay(reservations: DailyReservations): JSX.Element {
+function ReservationDisplay(reservations: DailyReservations, 
+    onSubmit: () => void): JSX.Element 
+{
     const [showForm, setShowForm] = useState(false);
     const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
     const [selectedTime, setSelectedTime] = useState<Date | null>(null);
@@ -120,6 +129,11 @@ function ReservationDisplay(reservations: DailyReservations): JSX.Element {
         setShowForm(false);
     };
 
+    const handleSubmit = () => {
+        onSubmit();
+        setShowForm(false);
+    }
+
     return (
         <ReservationSection>
             { showForm &&
@@ -127,7 +141,8 @@ function ReservationDisplay(reservations: DailyReservations): JSX.Element {
                     <ReservationForm
                         dailyReservations={reservations}
                         reservation={selectedReservation}
-                        time={selectedTime} />
+                        time={selectedTime}
+                        onSubmit={handleSubmit} />
                     <ResButton onClick={(e) => closeForm()}>Close</ResButton>
                 </div>
             ||

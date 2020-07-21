@@ -60,9 +60,9 @@ const DeleteButton = styled.button`
     width: 80px;
 `
 
-function ReservationForm({dailyReservations, reservation, time}: 
+function ReservationForm({dailyReservations, reservation, time, onSubmit}: 
     {dailyReservations: DailyReservations, reservation: Reservation | null, 
-    time: Date | null}): JSX.Element
+    time: Date | null, onSubmit: () => void}): JSX.Element
 {
     if(reservation) {
         time = reservation.time;
@@ -73,8 +73,6 @@ function ReservationForm({dailyReservations, reservation, time}:
 
     reservation = reservation || new Reservation();
     time = time || GetStartTime(timeSlots);
-
-    // debugger;
 
     const [nameError, setNameError] = useState("");
     const [emailError, setEmailError] = useState("");
@@ -114,13 +112,13 @@ function ReservationForm({dailyReservations, reservation, time}:
         if(!validate() || !reservation) {
             return;
         }
-
+        
         apiRequest(reservation).then(result => {
-            debugger;
             if(!result.id) {
                 setRequestError(`Error ${isEditing ? "updating" : "creating"} reservation`);
             } else {
                 setSuccessMessage("success");
+                onSubmit();
             }
         });
     }
@@ -248,7 +246,11 @@ function PartySizeSection({reservation}: {reservation: Reservation}): JSX.Elemen
 function TimeSection({reservation, validTimes, onChange}: 
     {reservation: Reservation, validTimes: Date[], onChange: (t: Date) => void}): JSX.Element 
 {
-    const [time, setTime] = useState(reservation.time || new Date(0));
+    let initTime: Date = reservation.time;
+    if(initTime.getTime() == 0 && validTimes.length > 0) {
+        initTime = validTimes[0];
+    }
+    const [time, setTime] = useState(initTime);
     
     useEffect(() => {
         onChange(time);
