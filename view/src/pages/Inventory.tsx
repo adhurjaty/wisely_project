@@ -119,6 +119,7 @@ function InventoryDisplay(state: InventoryState,
         setTimeSlots(timeSlots.filter(x => x !== ts));
     };
 
+    // adjust other time spans so no overlapping
     const onTimeChange = (ts: InventorySpan) => {
         const newSpans = []
         for (const slot of timeSlots) {
@@ -127,17 +128,18 @@ function InventoryDisplay(state: InventoryState,
                 continue;
             }
 
-            const newSlot = new InventorySpan().fromJson(slot);
-            if(ts.startTime.getTime() < slot.endTime.getTime() &&
-                ts.endTime.getTime() > slot.endTime.getTime()) 
-            {
-                newSlot.endTime = new Date(ts.startTime.getTime());
+            if(containsFully(ts, slot)) {
+                continue;
             }
-            if(ts.endTime.getTime() > slot.startTime.getTime() &&
-                ts.startTime.getTime() < slot.startTime.getTime()) 
-            {
+
+            const newSlot = new InventorySpan().fromJson(slot);
+            if(mustMoveStartTime(ts, slot)) {
                 newSlot.startTime = new Date(ts.endTime.getTime());
             }
+            else if(mustMoveEndTime(ts, slot)) {
+                newSlot.endTime = new Date(ts.startTime.getTime());
+            }
+
             newSpans.push(newSlot)
         }
         setTimeSlots(newSpans);
@@ -155,6 +157,21 @@ function InventoryDisplay(state: InventoryState,
     )
 }
 
+function mustMoveStartTime(ts: InventorySpan, slot: InventorySpan): boolean {
+    return slot.startTime.getTime() < ts.endTime.getTime() &&
+        slot.endTime.getTime() > ts.endTime.getTime();
+}
+
+function mustMoveEndTime(ts: InventorySpan, slot: InventorySpan): boolean {
+    return slot.endTime.getTime() > ts.startTime.getTime()  &&
+        slot.startTime.getTime() < ts.startTime.getTime();
+}
+
+function containsFully(ts: InventorySpan, slot: InventorySpan): boolean {
+    return ts.startTime.getTime() <= slot.startTime.getTime() &&
+        slot.endTime.getTime() >= slot.endTime.getTime();
+}
+
 function TimeSlotDisplay({timeSlot, onTimeChange, onDelete}: 
     {timeSlot: InventorySpan, onTimeChange: (ts: InventorySpan) => void,
     onDelete: (ts: InventorySpan) => void}): JSX.Element 
@@ -166,22 +183,22 @@ function TimeSlotDisplay({timeSlot, onTimeChange, onDelete}:
     useEffect(() => {
         timeSlot.startTime = fromTime;
         if(timeSlot.endTime.getTime() <= fromTime.getTime()) {
-            debugger;
             const time = new Date(fromTime.getTime());
             time.setHours(time.getHours() + 1);
             setToTime(time);
         }
+
         onTimeChange(timeSlot);
     }, [fromTime]);
 
     useEffect(() => {
         timeSlot.endTime = toTime;
         if(timeSlot.startTime.getTime() >= toTime.getTime()) {
-            debugger;
             const time = new Date(toTime.getTime());
             time.setHours(time.getHours() - 1);
             setFromTime(time);
         }
+
         onTimeChange(timeSlot);
     }, [toTime]);
 
