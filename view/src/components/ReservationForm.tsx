@@ -74,21 +74,15 @@ function ReservationForm({dailyReservations, reservation, time}:
     reservation = reservation || new Reservation();
     time = time || GetStartTime(timeSlots);
 
+    // debugger;
+
     const [nameError, setNameError] = useState("");
     const [emailError, setEmailError] = useState("");
     const [requestError, setRequestError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
-    const [selectedTime, setTime] = useState(reservation?.time || new Date(0));
     const [remainingSlots, setRemainingSlots] = useState(
-        GetRemainingSlots(dailyReservations, selectedTime));
+        GetRemainingSlots(dailyReservations, time));
     const [submitEnabled, setSubmitEnabled] = useState(remainingSlots > 0);
-    
-    useEffect(() => {
-        const slots = GetRemainingSlots(dailyReservations, selectedTime);
-        setRemainingSlots(slots);
-        setSubmitEnabled(slots > 0);
-        (reservation as Reservation).time = selectedTime;
-    }, [selectedTime]);
 
     const validate = () => {
         setNameError('');
@@ -139,6 +133,12 @@ function ReservationForm({dailyReservations, reservation, time}:
         deleteReservation(reservation);
     }
 
+    const onTimeChange = (time: Date) => {
+        const slots = GetRemainingSlots(dailyReservations, time);
+        setRemainingSlots(slots);
+        setSubmitEnabled(slots > 0);
+    }
+
     return (
         <Container>
             <h4>{isEditing ? "Edit Reservation" : "Make Reservation"}</h4>
@@ -148,12 +148,10 @@ function ReservationForm({dailyReservations, reservation, time}:
                 <EmailSection reservation={reservation}
                     error={emailError} />
                 <PartySizeSection reservation={reservation} />
-                <TimeSection time={selectedTime}
-                    setTime={setTime}
-                    validTimes={GetValidTimes(timeSlots)} />
-                <RemainingSlotsSection dailyReservations={dailyReservations}
-                    time={selectedTime}
-                    remainingSlots={remainingSlots} />
+                <TimeSection reservation={reservation}
+                    validTimes={GetValidTimes(timeSlots)}
+                    onChange={onTimeChange} />
+                <RemainingSlotsSection remainingSlots={remainingSlots} />
             </SectionsContainer>
             { isEditing && (
                 <DeleteButton onClick={e => deleteRes()}>
@@ -247,9 +245,20 @@ function PartySizeSection({reservation}: {reservation: Reservation}): JSX.Elemen
     )
 }
 
-function TimeSection({time, setTime, validTimes}: 
-    {time: Date, setTime: (t: Date) => void, validTimes: Date[]}): JSX.Element 
+function TimeSection({reservation, validTimes, onChange}: 
+    {reservation: Reservation, validTimes: Date[], onChange: (t: Date) => void}): JSX.Element 
 {
+    const [time, setTime] = useState(reservation.time || new Date(0));
+    
+    useEffect(() => {
+        onChange(time);
+        reservation.time = time;
+    }, [time]);
+
+    useEffect(() => {
+        setTime(reservation.time);
+    }, [reservation]);
+
     return (
         <InputSection>
             <InputLabel>Time:</InputLabel>
@@ -283,8 +292,7 @@ function GetValidTimes(timeSlots: InventorySpan[]): Date[] {
     }).flat();
 }
 
-function RemainingSlotsSection({dailyReservations, time, remainingSlots}:
-    {dailyReservations: DailyReservations, time: Date, remainingSlots: number}): JSX.Element
+function RemainingSlotsSection({remainingSlots}: {remainingSlots: number}): JSX.Element
 {
     return (
         <InputSection>
