@@ -82,13 +82,14 @@ function Inventory(): JSX.Element {
             <DayCalendar date={date}
                 setDate={setDate} />
             <StateDisplay state={state}
+                date={date}
                 onSubmit={() => loadInventory(date)} />
         </div>
     );
 }
 
-function StateDisplay({state, onSubmit}: 
-    {state: InventoryState, onSubmit: () => void}): 
+function StateDisplay({state, date, onSubmit}: 
+    {state: InventoryState, date: Date, onSubmit: () => void}): 
     JSX.Element 
 {
     if(state.isLoading) {
@@ -99,7 +100,7 @@ function StateDisplay({state, onSubmit}:
         return ErrorDisplay(state.error);
     }
 
-    return InventoryDisplay(state, onSubmit);
+    return InventoryDisplay(state, date, onSubmit);
 }
 
 function IsLoadingDisplay(): JSX.Element {
@@ -110,13 +111,16 @@ function ErrorDisplay(error: string): JSX.Element {
     return <ErrorText>{error}</ErrorText>
 }
 
-function InventoryDisplay(state: InventoryState, 
+function InventoryDisplay(state: InventoryState, date: Date,
     onSubmit: () => void): JSX.Element 
 {
     const [timeSlots, setTimeSlots] = useState(state.timeSlots);
+    const [showAddButton, setShowAdd] = useState(maxEndTimeHour(state.timeSlots) < 24);
 
     const onDelete = (ts: InventorySpan) => {
-        setTimeSlots(timeSlots.filter(x => x !== ts));
+        const newSlots = timeSlots.filter(x => x !== ts);
+        setTimeSlots(newSlots);
+        setShowAdd(maxEndTimeHour(newSlots) < 24);
     };
 
     // adjust other time spans so no overlapping
@@ -143,7 +147,22 @@ function InventoryDisplay(state: InventoryState,
             newSpans.push(newSlot)
         }
         setTimeSlots(newSpans);
+        setShowAdd(maxEndTimeHour(newSpans) < 24);
     };
+
+    const onAdd = () => {
+        const newSlot = new InventorySpan();
+        if(timeSlots.length) {
+            const lastSlot = timeSlots[timeSlots.length - 1];
+            newSlot.startTime = lastSlot.endTime;
+        } else {
+            newSlot.startTime = date;
+        }
+        newSlot.endTime = new Date(newSlot.startTime);
+        newSlot.endTime.setHours(newSlot.endTime.getHours() + 1);
+
+        setTimeSlots(timeSlots.concat([newSlot]));
+    }
 
     return (
         <SlotsContainer>
@@ -153,8 +172,13 @@ function InventoryDisplay(state: InventoryState,
                     onTimeChange={onTimeChange}
                     key={`slots-${i}`} />
             ))}
+            {showAddButton && <button onClick={(e) => onAdd()}>Add</button>}
         </SlotsContainer>
     )
+}
+
+function maxEndTimeHour(slots: InventorySpan[]): number {
+    return Math.max(...slots.map(s => s.endTime.getHours() || 24));
 }
 
 function mustMoveStartTime(ts: InventorySpan, slot: InventorySpan): boolean {
@@ -169,7 +193,7 @@ function mustMoveEndTime(ts: InventorySpan, slot: InventorySpan): boolean {
 
 function containsFully(ts: InventorySpan, slot: InventorySpan): boolean {
     return ts.startTime.getTime() <= slot.startTime.getTime() &&
-        slot.endTime.getTime() >= slot.endTime.getTime();
+        ts.endTime.getTime() >= slot.endTime.getTime();
 }
 
 function TimeSlotDisplay({timeSlot, onTimeChange, onDelete}: 
