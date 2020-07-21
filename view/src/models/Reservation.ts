@@ -11,7 +11,7 @@ export default class Reservation {
     name: string = "";
     email: string = "";
     partySize: number = 1;
-    time: Date = new Date();
+    time: Date = new Date(0);
 
     fromJson(resp: ReservationResponse): Reservation {
         this.id = resp.id;

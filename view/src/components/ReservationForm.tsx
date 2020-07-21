@@ -5,6 +5,7 @@ import InventorySpan from '../models/InventorySpan';
 import { MAX_PARTY_SIZE, SLOT_DURATION } from '../constants';
 import { range, formatTime } from '../helpers';
 import { updateReservation, makeReservation, deleteReservation } from '../backend_interface/api_interface';
+import DailyReservations from '../models/DailyReservations';
 
 
 const Container = styled.div`
@@ -59,22 +60,35 @@ const DeleteButton = styled.button`
     width: 80px;
 `
 
-function ReservationForm({timeSlots, reservation, time}: 
-    {timeSlots: InventorySpan[], reservation: Reservation | null, time: Date | null}): 
-    JSX.Element
+function ReservationForm({dailyReservations, reservation, time}: 
+    {dailyReservations: DailyReservations, reservation: Reservation | null, 
+    time: Date | null}): JSX.Element
 {
+    if(reservation) {
+        time = reservation.time;
+    }
+
+    const isEditing = !!reservation;
+    const timeSlots = dailyReservations.getInventories();
+
+    reservation = reservation || new Reservation();
+    time = time || GetStartTime(timeSlots);
+
     const [nameError, setNameError] = useState("");
     const [emailError, setEmailError] = useState("");
     const [requestError, setRequestError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
-
-    const isEditing = !!reservation;
-
-    if(reservation) {
-        time = reservation.time;
-    }
-    reservation = reservation || new Reservation();
-    time = time || GetStartTime(timeSlots);
+    const [selectedTime, setTime] = useState(reservation?.time || new Date(0));
+    const [remainingSlots, setRemainingSlots] = useState(
+        GetRemainingSlots(dailyReservations, selectedTime));
+    const [submitEnabled, setSubmitEnabled] = useState(remainingSlots > 0);
+    
+    useEffect(() => {
+        const slots = GetRemainingSlots(dailyReservations, selectedTime);
+        setRemainingSlots(slots);
+        setSubmitEnabled(slots > 0);
+        (reservation as Reservation).time = selectedTime;
+    }, [selectedTime]);
 
     const validate = () => {
         setNameError('');
@@ -134,15 +148,20 @@ function ReservationForm({timeSlots, reservation, time}:
                 <EmailSection reservation={reservation}
                     error={emailError} />
                 <PartySizeSection reservation={reservation} />
-                <TimeSection reservation={reservation}
-                    timeSlots={timeSlots} />
+                <TimeSection time={selectedTime}
+                    setTime={setTime}
+                    validTimes={GetValidTimes(timeSlots)} />
+                <RemainingSlotsSection dailyReservations={dailyReservations}
+                    time={selectedTime}
+                    remainingSlots={remainingSlots} />
             </SectionsContainer>
             { isEditing && (
                 <DeleteButton onClick={e => deleteRes()}>
                     Delete
                 </DeleteButton>
             )}
-            <SubmitButton onClick={e => handleSubmit()}>
+            <SubmitButton onClick={e => handleSubmit()}
+                disabled={!submitEnabled}>
                 {isEditing && "Update" || "Create"}
             </SubmitButton>
             <FieldError>{requestError}</FieldError>
@@ -228,23 +247,9 @@ function PartySizeSection({reservation}: {reservation: Reservation}): JSX.Elemen
     )
 }
 
-function TimeSection({reservation, timeSlots}: 
-    {reservation: Reservation, timeSlots: InventorySpan[]}): JSX.Element 
+function TimeSection({time, setTime, validTimes}: 
+    {time: Date, setTime: (t: Date) => void, validTimes: Date[]}): JSX.Element 
 {
-    const validTimes = GetValidTimes(timeSlots);
-    const defaultTime = reservation.time.getTime() == new Date().getTime() ?
-        validTimes[0] : reservation.time;
-    
-    const [time, setTime] = useState(defaultTime);
-
-    useEffect(() => {
-        reservation.time = time
-    }, [time]);
-
-    useEffect(() => {
-        setTime(reservation.time);
-    }, [reservation]);
-
     return (
         <InputSection>
             <InputLabel>Time:</InputLabel>
@@ -277,5 +282,27 @@ function GetValidTimes(timeSlots: InventorySpan[]): Date[] {
         return slots;
     }).flat();
 }
+
+function RemainingSlotsSection({dailyReservations, time, remainingSlots}:
+    {dailyReservations: DailyReservations, time: Date, remainingSlots: number}): JSX.Element
+{
+    return (
+        <InputSection>
+            <InputLabel>Remaining Slots:</InputLabel>
+            <div>{remainingSlots}</div>
+        </InputSection>
+    )
+}
+
+function GetRemainingSlots(dailyReservations: DailyReservations, time: Date): number {
+    const slot = dailyReservations.getInventoryAtHour(time.getHours());
+    if(!slot) {
+        return 0;
+    }
+    const reservations = dailyReservations.getSlotReservations(time.getHours(), 
+        time.getMinutes()).length;
+    return slot.numParties - reservations;
+}
+
 
 export default ReservationForm

@@ -125,7 +125,7 @@ function ReservationDisplay(reservations: DailyReservations): JSX.Element {
             { showForm &&
                 <div id="reservationForm">
                     <ReservationForm
-                        timeSlots={reservations.getInventories()}
+                        dailyReservations={reservations}
                         reservation={selectedReservation}
                         time={selectedTime} />
                     <ResButton onClick={(e) => closeForm()}>Close</ResButton>
