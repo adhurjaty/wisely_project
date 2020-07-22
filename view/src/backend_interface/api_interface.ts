@@ -11,19 +11,6 @@ export interface StatusMessage {
 }
 
 export async function getInventory(day: Date): Promise<InventorySpan[]> {
-    // let inv1 = new InventorySpan();
-    // inv1.id = 'foo';
-    // inv1.startTime = new Date(2020, 6, 20, 10, 0);
-    // inv1.endTime = new Date(2020, 6, 20, 17, 0);
-    // inv1.numParties = 3;
-
-    // let inv2 = new InventorySpan();
-    // inv2.id = 'bar';
-    // inv2.startTime = new Date(2020, 6, 20, 17, 0);
-    // inv2.endTime = new Date(2020, 6, 20, 22, 0);
-    // inv2.numParties = 6;
-
-    // return [inv1, inv2]
     const tz = day.getTimezoneOffset() / 60;
     const req = new Request(API_DAY_INVENTORIES(formatDay(day), tz), {method: 'GET'});
     const response = await fetch(req);
