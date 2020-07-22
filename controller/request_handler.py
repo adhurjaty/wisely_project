@@ -35,6 +35,7 @@ def get_inventories():
 
         return g.controller.get_inventories(day)
     except Exception as e:
+        app.logger.error(str(e))
         return show_error(str(e))
 
 
@@ -44,6 +45,7 @@ def set_inventories():
         g.controller.set_inventories(request.json.get('inventory'))
         return show_success()
     except Exception as e:
+        app.logger.error(str(e))
         return show_error(str(e))
 
 
@@ -56,6 +58,7 @@ def get_reservations():
 
         return g.controller.get_reservations(day)
     except Exception as e:
+        app.logger.error(str(e))
         return show_error(str(e))
 
 @app.route(RESERVATIONS_ROUTE, methods=['POST'])
@@ -63,6 +66,7 @@ def make_reservation():
     try:
         return g.controller.make_reservation(**request.json)
     except Exception as e:
+        app.logger.error(str(e))
         return show_error(str(e))
 
 
@@ -71,6 +75,7 @@ def update_reservation(reservation_id):
     try:
         return g.controller.update_reservation(**request.json)
     except Exception as e:
+        app.logger.error(str(e))
         return show_error(str(e))
 
 
@@ -80,6 +85,7 @@ def delete_reservation(reservation_id):
         g.controller.delete_reservation(reservation_id)
         return show_success()
     except Exception as e:
+        app.logger.error(str(e))
         return show_error(str(e))
 
 def show_success():
