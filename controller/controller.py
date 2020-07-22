@@ -17,31 +17,32 @@ class Controller:
         self.db_int = db_int
         self.view_model = vm
 
-    def get_inventories(self, day: str) -> List[dict]:
-        date = self._get_tz_day(day)
+    def get_inventories(self, day: str, tz_offset: int) -> List[dict]:
+        date = self._get_tz_day(day, tz_offset)
         inventories = self.db_int.get_inventories(date)
         return self.view_model.inventories(inventories)
 
-    def set_inventories(self, inv_list: List[dict]):
+    def set_inventories(self, inv_list: List[dict], tz: int):
         if len(inv_list) == 0:
             raise Exception('Invalid inventory list - empty')
 
         inventories = [Inventory(**inv) for inv in inv_list]
-        date = self._get_tz_day(inventories[0].start_time)
+        date = self._get_tz_day(inventories[0].start_time, tz)
         self.db_int.delete_inventories_on_day(date)
         self.db_int.list_insert(inventories)
 
-    def _get_tz_day(self, time: str) -> datetime:
+    def _get_tz_day(self, time: str, tz_offset: int) -> datetime:
         date = arrow.get(time).date()
-        return datetime(date.year, date.month, date.day)
+        dt = datetime(date.year, date.month, date.day)
+        return dt + timedelta(hours=tz_offset)
 
     def make_reservation(self, **reservation_info):
         reservation = Reservation(**reservation_info)
         reservation = self.db_int.insert(reservation)
         return self.view_model.reservation(reservation)
 
-    def get_reservations(self, day: str) -> List[dict]:
-        date = arrow.get(day).datetime
+    def get_reservations(self, day: str, tz: int) -> List[dict]:
+        date = arrow.get(day).datetime + timedelta(hours=tz)
         reservations = self.db_int.get_reservations_on_day(date)
         return self.view_model.reservations(reservations)
 
@@ -53,14 +54,5 @@ class Controller:
 
     def delete_reservation(self, id: str):
         self.db_int.delete_reservation(id)
-
-    def get_time_slot(self, slot_id: UUID):
-        pass
-
-    def create_time_slot(self, time_slot_info: dict):
-        pass
-
-    def update_time_slot(self, time_slot):
-        pass
 
     

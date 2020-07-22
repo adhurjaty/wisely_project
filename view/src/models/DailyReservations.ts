@@ -72,7 +72,7 @@ export default class DailyReservations {
 
     getOpenCloseHours(): [number, number] {
         const minHour = Math.min(...this.timeSpans.map(s => s.startTime.getHours()));
-        const maxHour = Math.max(...this.timeSpans.map(s => s.endTime.getHours()));
+        const maxHour = Math.max(...this.timeSpans.map(s => s.endTime.getHours() || 24));
         return [minHour, maxHour];
     }
 }

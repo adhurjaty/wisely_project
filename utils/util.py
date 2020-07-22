@@ -20,6 +20,7 @@ def format_date(d: datetime) -> str:
     return d.strftime('%Y-%m-%dT%H:%M:%SZ')
 
 def format_date_tz(d: datetime) -> str:
+    # return format_date(d)
     d += timedelta(seconds=timezone) - timedelta(hours=int(is_dst()))
     return d.strftime('%Y-%m-%dT%H:%M:%SZ')
 

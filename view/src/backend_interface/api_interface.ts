@@ -24,7 +24,8 @@ export async function getInventory(day: Date): Promise<InventorySpan[]> {
     // inv2.numParties = 6;
 
     // return [inv1, inv2]
-    const req = new Request(API_DAY_INVENTORIES(formatDay(day)), {method: 'GET'});
+    const tz = day.getTimezoneOffset() / 60;
+    const req = new Request(API_DAY_INVENTORIES(formatDay(day), tz), {method: 'GET'});
     const response = await fetch(req);
     const respJson = await response.json() as any;
 
@@ -40,10 +41,14 @@ export async function getInventory(day: Date): Promise<InventorySpan[]> {
 }
 
 export async function setInventory(spans: InventorySpan[]): Promise<StatusMessage> {
+    const tz = new Date().getTimezoneOffset() / 60;
     const req = new Request(API_INVENTORIES, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({inventory: spans.map(s => s.toJson())})
+        body: JSON.stringify({
+            inventory: spans.map(s => s.toJson()),
+            tz: tz
+        })
     });
     const response = await fetch(req);
     return await response.json() as StatusMessage;
@@ -96,29 +101,8 @@ export async function getDailyReservations(day: Date): Promise<DailyReservations
 }
 
 async function getDayReservations(day: Date): Promise<Reservation[]> {
-    // let r1 = new Reservation();
-    // r1.id = 'a';
-    // r1.name = 'Anil';
-    // r1.email = 'anil@example.com';
-    // r1.partySize = 3;
-    // r1.time = new Date(2020, 7, 15, 12, 15);
-
-    // let r2 = new Reservation();
-    // r2.id = 'b';
-    // r2.name = 'Aimee';
-    // r2.email = 'aimee@example.com';
-    // r2.partySize = 6;
-    // r2.time = new Date(2020, 7, 15, 12, 15);
-
-    // let r3 = new Reservation();
-    // r3.id = 'c';
-    // r3.name = 'Jordan';
-    // r3.email = 'jordan@example.com';
-    // r3.partySize = 2;
-    // r3.time = new Date(2020, 7, 15, 18, 45);
-
-    // return [r1, r2, r3]
-    const req = new Request(API_GET_RESERVATIONS(formatDay(day)), {method: 'GET'});
+    const tz = day.getTimezoneOffset() / 60;
+    const req = new Request(API_GET_RESERVATIONS(formatDay(day), tz), {method: 'GET'});
     const response = await fetch(req);
     const respJson = await response.json() as any;
 

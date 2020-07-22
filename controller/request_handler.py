@@ -30,10 +30,11 @@ def set_controller():
 def get_inventories():
     try:
         day = request.args.get('day')
+        tz = int(request.args.get('tz'))
         if not day:
             raise Exception('Must specify day')
 
-        return g.controller.get_inventories(day)
+        return g.controller.get_inventories(day, tz)
     except Exception as e:
         app.logger.error(str(e))
         return show_error(str(e))
@@ -42,7 +43,9 @@ def get_inventories():
 @app.route(INVENTORY_ROUTE, methods=['POST'])
 def set_inventories():
     try:
-        g.controller.set_inventories(request.json.get('inventory'))
+        inventory = request.json.get('inventory')
+        tz = int(request.json.get('tz'))
+        g.controller.set_inventories(inventory, tz)
         return show_success()
     except Exception as e:
         app.logger.error(str(e))
@@ -53,10 +56,11 @@ def set_inventories():
 def get_reservations():
     try:
         day = request.args.get('day')
+        tz = int(request.args.get('tz'))
         if not day:
             raise Exception('Must specify day')
 
-        return g.controller.get_reservations(day)
+        return g.controller.get_reservations(day, tz)
     except Exception as e:
         app.logger.error(str(e))
         return show_error(str(e))
